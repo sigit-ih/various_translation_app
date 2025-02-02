@@ -1,0 +1,75 @@
+name: pdf_translator_app_test
+description: "PDF Translation App"
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Implement plugin untuk save data sederhana (key-value)
+  # https://pub.dev/packages/shared_preferences
+  shared_preferences: ^2.3.5
+
+  # Untuk date time formatter
+  # https://pub.dev/packages/intl
+  intl: ">=0.17.0 <=0.20.1"
+
+  # Untuk http connection
+  # https://pub.dev/packages/http
+  http: ^1.2.2
+
+  # Untuk loading
+  # https://pub.dev/packages/progress_dialog_null_safe
+  progress_dialog_null_safe: ^3.0.0
+
+  # Translator dari Google Translate API
+  # https://pub.dev/packages/translator
+  # translator: ^1.0.3+1
+  
+  # PDF Reader
+  # https://pub.dev/packages/pdf
+  # pdf: ^3.11.1
+
+  # Untuk icon format svg
+  # https://pub.dev/packages/flutter_svg
+  flutter_svg: ^2.0.17
+
+  # Untuk deteksi text
+  # https://pub.dev/packages/google_mlkit_text_recognition
+  google_mlkit_text_recognition: ^0.14.0
+
+  # implementasi multi language
+  # https://pub.dev/packages/easy_localization/install
+  easy_localization: ^3.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  # Untuk mendaftarkan berbagai asset image yang akan digunakan
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/icons/action-based/
+    - assets/icons/formatting/
+    - assets/icons/object-based/
+    - assets/icons/carbon-design-system/
+    - assets/icons/carbon-design-system/16/
+    - assets/icons/carbon-design-system/20/
+    - assets/icons/carbon-design-system/24/
+    - assets/icons/carbon-design-system/32/
+    - assets/translations/
+    - lib/translations/
+  #- assets/certificates
+
+  # Untuk mendaftarkan custom font yang akan digunakan
+  # fonts:
+  #   - family: BiomeRegular
+  #     fonts:
+  #       - asset: assets/fonts/biome_regular.ttf

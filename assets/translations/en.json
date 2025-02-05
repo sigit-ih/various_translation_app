@@ -1,7 +1,12 @@
 {
+  "version": "Version",
   "translation": "Translation",
+  "title": "Various Translations",
   "text_recognition_translation": "Text Recognition and Translation",
   "ocr_translation": "OCR Translation",
+  "japanese": "Japanese",
+  "indonesian": "Indonesian",
+  "english": "English",
   "document_translation": "Document Translation",
   "dictionary": "Dictionary",
   "about": "About"

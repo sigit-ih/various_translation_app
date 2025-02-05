@@ -1,7 +1,12 @@
 {
+  "version": "Versi",
   "translation": "Terjemahan",
+  "title": "Berbagai Terjemahan",
   "text_recognition_translation": "Pengenalan dan Terjemahan Teks",
   "ocr_translation": "Terjemahan OCR",
+  "japanese": "Jepang",
+  "indonesian": "Indonesia",
+  "english": "Inggris",
   "document_translation": "Terjemahan Dokumen",
   "dictionary": "Kamus",
   "about": "Tentang"

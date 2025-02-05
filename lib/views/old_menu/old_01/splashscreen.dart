@@ -55,7 +55,7 @@ class SplashScreenState extends State<SplashScreen> {
               TextSpan(
                   text: '1.0.0 Beta',
                   style: TextStyle(
-                      color: Colors.redAccent,
+                      color: Colors.deepPurple,
                       fontSize: 14,
                       fontStyle: FontStyle.italic)),
             ])),

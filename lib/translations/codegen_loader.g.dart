@@ -15,28 +15,43 @@ class CodegenLoader extends AssetLoader{
   }
 
   static const Map<String,dynamic> _en = {
+  "version": "Version",
   "translation": "Translation",
+  "title": "Various Translations",
   "text_recognition_translation": "Text Recognition and Translation",
   "ocr_translation": "OCR Translation",
+  "japanese": "Japanese",
+  "indonesian": "Indonesian",
+  "english": "English",
   "document_translation": "Document Translation",
   "dictionary": "Dictionary",
   "about": "About"
 };
 static const Map<String,dynamic> _id = {
+  "version": "Versi",
   "translation": "Terjemahan",
+  "title": "Berbagai Terjemahan",
   "text_recognition_translation": "Pengenalan dan Terjemahan Teks",
   "ocr_translation": "Terjemahan OCR",
+  "japanese": "Jepang",
+  "indonesian": "Indonesia",
+  "english": "Inggris",
   "document_translation": "Terjemahan Dokumen",
   "dictionary": "Kamus",
   "about": "Tentang"
 };
 static const Map<String,dynamic> _ja = {
-  "about": "について",
-  "dictionary": "辞書",
+  "version": "バージョン",
   "translation": "翻訳",
+  "title": "さまざまな翻訳",
+  "text_recognition_translation": "テキストの認識と翻訳",
   "ocr_translation": "OCR翻訳",
+  "japanese": "日本語",
+  "indonesian": "インドネシア語",
+  "english": "英語",
   "document_translation": "文書翻訳",
-  "text_recognition_translation": "テキストの認識と翻訳"
+  "dictionary": "辞書",
+  "about": "について"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"en": _en, "id": _id, "ja": _ja};
 }

@@ -41,9 +41,17 @@ dependencies:
   # https://pub.dev/packages/google_mlkit_text_recognition
   google_mlkit_text_recognition: ^0.14.0
 
-  # implementasi multi language
+  # Implementasi multi language
   # https://pub.dev/packages/easy_localization/install
   easy_localization: ^3.0.7
+
+  # Implementasi BLoC
+  # https://pub.dev/packages/flutter_bloc
+  flutter_bloc: ^9.0.0
+
+  # 
+  # https://pub.dev/packages/equatable
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

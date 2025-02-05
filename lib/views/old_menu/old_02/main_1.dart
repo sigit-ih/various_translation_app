@@ -1,10 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdf_translator_app_test/translations/codegen_loader.g.dart';
 import 'package:pdf_translator_app_test/utilities/routes.dart';
-import 'package:pdf_translator_app_test/views/blocs/language_bloc.dart'; // Import LanguageBloc
 import 'package:pdf_translator_app_test/views/mainscreen.dart';
 import 'package:pdf_translator_app_test/views/old_menu/old_01/splashscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/aboutscreen.dart';
@@ -14,27 +12,25 @@ import 'package:pdf_translator_app_test/views/submenu/ocrtranslationscreen.dart'
 import 'package:pdf_translator_app_test/views/submenu/textrecognitiontranslationscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/wordtranslationscreen.dart';
 
-void main() async {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  runApp(
-    EasyLocalization(
-      supportedLocales: [Locale('en'), Locale('id'), Locale('ja')],
-      path: 'assets/translations/',
-      startLocale: Locale('en'),
-      fallbackLocale: Locale('en'),
-      assetLoader: CodegenLoader(),
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<LanguageBloc>(
-            create: (context) => LanguageBloc()..add(LoadLanguageEvent()), // Event yang benar
-          ),
-        ],
-        child: const MainApp(),
-      ),
-    ),
-  );
+  //runApp(const MainApp());
+
+  runApp(EasyLocalization(
+    supportedLocales: [Locale('en'), Locale('id'), Locale('ja')],
+    path: 'assets/translations/',
+    startLocale: Locale('en'), // default locale language (https://www.npmjs.com/package/i18n-iso-countries)
+    fallbackLocale: Locale('en'), //
+    assetLoader: CodegenLoader(),
+    // run this command on terminal to generate localizations assets
+    // to add new text, please use i18n manager (open source tools)
+    // flutter pub run easy_localization:generate -S "assets/translations" -O "lib/translations"
+    // flutter pub run easy_localization:generate -S "assets/translations" -O "lib/translations" -o "locale_keys.g.dart" -f keys
+
+    child: MainApp(),
+  ));
 }
 
 class MainApp extends StatelessWidget {
@@ -44,26 +40,27 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Lock orientasi layar menjadi Portrait Up
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
+    
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false, // Menghapus ribbon debug di kanan atas
       title: 'Various Translator',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo)
       ),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      home: const SplashScreen(),
+      home: SplashScreen(),
       routes: {
-        Routes.splashscreen: (context) => const SplashScreen(),
+        Routes.splashscreen: (context) => SplashScreen(),
         Routes.mainscreen: (context) => MainScreen(),
-        Routes.dictionaryscreen: (context) => const DictionaryScreen(),
-        Routes.wordtranslationscreen: (context) => const WordTranslationScreen(),
-        Routes.ocrtranslationscreen: (context) => const OCRTranslationScreen(),
-        Routes.documenttranslationscreen: (context) => const DocumentTranslationScreen(),
-        Routes.textrecognitiontranslationscreen: (context) => const TextRecognitionTranslationScreen(),
-        Routes.aboutscreen: (context) => const AboutScreen(),
+        Routes.dictionaryscreen: (context) => DictionaryScreen(),
+        Routes.wordtranslationscreen: (context) => WordTranslationScreen(),
+        Routes.ocrtranslationscreen: (context) => OCRTranslationScreen(),
+        Routes.documenttranslationscreen: (context) => DocumentTranslationScreen(),
+        Routes.realtimetexttranslationscreen: (context) => RealTimeTextTranslationScreen(),
+        Routes.aboutscreen: (context) => AboutScreen(), 
+        
       },
     );
   }

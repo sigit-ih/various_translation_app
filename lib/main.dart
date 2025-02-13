@@ -4,15 +4,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdf_translator_app_test/translations/codegen_loader.g.dart';
 import 'package:pdf_translator_app_test/utilities/routes.dart';
-import 'package:pdf_translator_app_test/views/blocs/language_bloc.dart'; // Import LanguageBloc
+import 'package:pdf_translator_app_test/views/blocs/dictionary_bloc.dart';
+import 'package:pdf_translator_app_test/views/blocs/language_bloc.dart';
 import 'package:pdf_translator_app_test/views/mainscreen.dart';
-import 'package:pdf_translator_app_test/views/old_menu/old_01/splashscreen.dart';
+import 'package:pdf_translator_app_test/views/splashscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/aboutscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/dictionaryscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/documenttranslationscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/ocrtranslationscreen.dart';
-import 'package:pdf_translator_app_test/views/submenu/textrecognitiontranslationscreen.dart';
-import 'package:pdf_translator_app_test/views/submenu/wordtranslationscreen.dart';
+// import 'package:pdf_translator_app_test/nlp_detector_views/language_translator_view.dart'; // MLKit
+import 'package:pdf_translator_app_test/views/submenu/wordtranslationscreen.dart'; // Old
+// import 'package:pdf_translator_app_test/vision_detector_views/text_detector_view.dart'; // MLKit
+import 'package:pdf_translator_app_test/views/submenu/textrecognitiontranslationscreen.dart'; // Old
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +33,7 @@ void main() async {
           BlocProvider<LanguageBloc>(
             create: (context) => LanguageBloc()..add(LoadLanguageEvent()), // Event yang benar
           ),
+          BlocProvider(create: (context) => DictionaryBloc()),
         ],
         child: const MainApp(),
       ),
@@ -48,9 +52,6 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Various Translator',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-      ),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,

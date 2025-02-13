@@ -58,7 +58,7 @@ class MainApp extends StatelessWidget {
         Routes.wordtranslationscreen: (context) => WordTranslationScreen(),
         Routes.ocrtranslationscreen: (context) => OCRTranslationScreen(),
         Routes.documenttranslationscreen: (context) => DocumentTranslationScreen(),
-        Routes.realtimetexttranslationscreen: (context) => RealTimeTextTranslationScreen(),
+        Routes.textrecognitiontranslationscreen: (context) => TextRecognitionTranslationScreen(),
         Routes.aboutscreen: (context) => AboutScreen(), 
         
       },

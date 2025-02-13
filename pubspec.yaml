@@ -41,6 +41,14 @@ dependencies:
   # https://pub.dev/packages/google_mlkit_text_recognition
   google_mlkit_text_recognition: ^0.14.0
 
+  # 
+  # https://pub.dev/packages/google_mlkit_commons
+  google_mlkit_commons: any
+
+  # 
+  # https://pub.dev/packages/google_mlkit_translation
+  google_mlkit_translation: ^0.12.0
+
   # Implementasi multi language
   # https://pub.dev/packages/easy_localization/install
   easy_localization: ^3.0.7
@@ -52,6 +60,33 @@ dependencies:
   # 
   # https://pub.dev/packages/equatable
   equatable: ^2.0.5
+
+  # 
+  # https://pub.dev/packages/camera
+  camera: ^0.11.1
+
+  # 
+  # https://pub.dev/packages/image_picker
+  image_picker: ^1.1.2
+
+  # 
+  # https://pub.dev/packages/path_provider
+  path_provider: ^2.1.5
+
+  # Speech to text
+  # https://pub.dev/packages/speech_to_text
+  speech_to_text: ^7.0.0
+
+  # Bentuk bubble seperti chat bubble
+  # https://pub.dev/packages/bubble
+  bubble: ^1.2.1
+
+  # Check permission
+  # https://pub.dev/packages/permission_handler
+  permission_handler: ^11.3.1
+
+dependency_overrides:
+  google_mlkit_commons: ^0.9.0
 
 dev_dependencies:
   flutter_test:

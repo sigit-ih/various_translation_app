@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:pdf_translator_app_test/translations/locale_keys.g.dart';
 import 'package:pdf_translator_app_test/utilities/sharedpreferences.dart';
 import 'package:pdf_translator_app_test/views/mainscreen.dart';
-// import 'package:pembekalan_flutter_01/views/dashboardscreen.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -19,6 +18,7 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // backgroundColor: Colors.indigo.shade800,
       backgroundColor: Colors.indigo.shade800,
       body: Center(
         child: Column(

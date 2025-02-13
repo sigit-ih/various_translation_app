@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     Routes.dictionaryscreen,
     Routes.ocrtranslationscreen,
     Routes.documenttranslationscreen,
-    Routes.realtimetexttranslationscreen,
+    Routes.textrecognitiontranslationscreen,
     Routes.aboutscreen,
   ];
 

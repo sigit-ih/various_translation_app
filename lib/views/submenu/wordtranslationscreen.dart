@@ -16,74 +16,78 @@ class WordTranslationScreen extends StatefulWidget {
 }
 
 class _WordTranslationScreenState extends State<WordTranslationScreen> {
+  List<String> languageList = [
+    LocaleKeys.english.tr(),
+    LocaleKeys.indonesian.tr(),
+    LocaleKeys.japanese.tr()
+  ];
   // Speech to text
   SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
-  String _lastWords = '';
   bool isRecordingSpeech = false;
+  String _lastWords = '';
   Color micButtonColor = Colors.indigo.shade800;
   Color micIconColor = Colors.white;
-
-  // Shared preference
   String language = 'English';
+
+  bool isResultVisible = false;
 
   @override
   void initState() {
     super.initState();
     _initSpeech();
-    print('isRecordingSpeech = $isRecordingSpeech');
     listenForPermissions();
-
-    // ambil username dari SharedPreferences
     SharedPreferencesHelper.readLanguage().then((value) {
       setState(() {
         language = value;
       });
     });
+
+    print(languageList);
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    print('Simple Translator = ${LocaleKeys.translation.tr()}');
+    String item1 = language;
+    String item2 = (language != 'English')
+        ? LocaleKeys.english.tr()
+        : LocaleKeys.indonesian.tr();
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(LocaleKeys.translation.tr()),
         backgroundColor: Colors.indigo[800],
         titleTextStyle: const TextStyle(
-            color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
       ),
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Container(
-          color: Colors.indigo[800],
-          width: size.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                flex: 5,
-                child: Container(
-                  height: size.height,
-                  width: size.width,
-                  color: Colors.white,
-                  child: Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: SizedBox(
-                              width: size.width, // Perbesar width Bubble
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Container(
+              color: Color.fromARGB(255, 248, 248, 248),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      color: Color.fromARGB(255, 248, 248, 248),
+                      width: double.infinity,
+                      child: SingleChildScrollView(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
                               child: Bubble(
                                 padding: BubbleEdges.all(10),
                                 margin: BubbleEdges.only(top: 15, right: 5),
@@ -91,177 +95,253 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                                 nip: BubbleNip.rightTop,
                                 color: Color.fromRGBO(225, 255, 199, 1.0),
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      language,
+                                      '~ $item1',
                                       style: TextStyle(
-                                        color: Colors.blue,
+                                        color: Colors.red,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     TextField(
-                                      maxLines: 8,
-                                      style:TextStyle(fontSize:14),
+                                      maxLines: 7,
+                                      style: TextStyle(fontSize: 14),
                                       decoration: InputDecoration(
                                         counterText: '',
-                                        enabledBorder: InputBorder.none, // Pastikan tidak ada border saat tidak aktif
+                                        enabledBorder: InputBorder.none,
                                         focusedBorder: InputBorder.none,
                                       ),
                                       maxLength: 300,
                                       onChanged: (value) {},
                                     ),
-                                    SizedBox(
-                                      width: size.width,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/carbon-design-system/32/copy.svg',
-                                            colorFilter:
-                                                ColorFilter.mode(Colors.blue, BlendMode.srcIn),
-                                            width: 25,
-                                            height: 25,
-                                          ),
-                                          SizedBox(width: 10),
-                                          SvgPicture.asset(
-                                            'assets/icons/carbon-design-system/32/microphone--filled.svg',
-                                            colorFilter:
-                                                ColorFilter.mode(Colors.blue, BlendMode.srcIn),
-                                            width: 25,
-                                            height: 25,
-                                          ),
-                                        ],
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        SvgPicture.asset(
+                                          'assets/icons/carbon-design-system/32/copy.svg',
+                                          colorFilter: ColorFilter.mode(
+                                              Colors.red, BlendMode.srcIn),
+                                          width: 25,
+                                          height: 25,
+                                        ),
+                                        SizedBox(width: 12),
+                                        SvgPicture.asset(
+                                          'assets/icons/carbon-design-system/32/volume--up--filled.svg',
+                                          colorFilter: ColorFilter.mode(
+                                              Colors.red, BlendMode.srcIn),
+                                          width: 25,
+                                          height: 25,
+                                        ),
+                                      ],
                                     )
                                   ],
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 40, // Batasi ukuran agar tidak makan tempat
-                          child: listLanguage(language),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Flexible(
-                  flex: 5,
-                  child: Container(
-                    height: size.height,
-                    width: size.width,
-                    color: Colors.blue,
-                    child: Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // TextField(
-                            //   maxLines: 11,
-                            //   // expands: true,
-                            //   decoration: InputDecoration(
-                            //     floatingLabelBehavior:
-                            //         FloatingLabelBehavior.always,
-                            //     alignLabelWithHint: true,
-                            //     contentPadding: EdgeInsets.all(10),
-                            //     enabledBorder: OutlineInputBorder(
-                            //       borderSide: BorderSide(
-                            //           color: Colors.blue, width: 2.0),
-                            //       borderRadius:
-                            //           BorderRadius.all(Radius.circular(11)),
-                            //     ),
-                            //     labelText: 'Default TextField 2',
-                            //     labelStyle: TextStyle(
-                            //         color: Colors.blue,
-                            //         fontWeight: FontWeight.bold),
-                            //     filled: true,
-                            //     fillColor: Colors.grey.shade200,
-                            //     counterText: '',
-                            //   ),
-                            //   maxLength: 120,
-                            //   onChanged: (value) {},
-                            // ),
-                          ]),
-                    ),
-                  )),
-              Flexible(
-                flex: 2,
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Flexible(
-                    flex: 4,
-                    child: Container(
-                      color: Colors.green,
-                    ),
-                  ),
-                  Flexible(
-                    flex: 3,
-                    child: Container(
-                      width: size.width,
-                      height: size.height,
-                      color: Colors.green,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: micButtonColor,
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(10),
-                        ),
-                        onPressed: () {
-                          // _speechToText.isNotListening ? _startListening : _stopListening;
-                          setState(() {
-                            if (isRecordingSpeech == true) {
-                              print(
-                                  'isRecordingSpeech awal = $isRecordingSpeech');
-                              print('_speechEnabled awal = $isRecordingSpeech');
-                              isRecordingSpeech = false;
-                              micButtonColor = Colors.indigo.shade800;
-                              micIconColor = Colors.white;
-                              print(
-                                  'Toggle true to false, isRecordingSpeech = $isRecordingSpeech');
-                              print(
-                                  '_speechEnabled akhir = $isRecordingSpeech');
-                            } else {
-                              print(
-                                  'isRecordingSpeech awal = $isRecordingSpeech');
-                              print('_speechEnabled awal = $isRecordingSpeech');
-                              isRecordingSpeech = true;
-                              micButtonColor = Colors.white;
-                              micIconColor = Colors.indigo.shade800;
-                              print(
-                                  'Toggle false to true, isRecordingSpeech = $isRecordingSpeech');
-                              print(
-                                  '_speechEnabled akhir = $isRecordingSpeech');
-                            }
-                          });
-                        },
-                        child: SvgPicture.asset(
-                          'assets/icons/carbon-design-system/32/microphone--filled.svg',
-                          colorFilter:
-                              ColorFilter.mode(micIconColor, BlendMode.srcIn),
-                          width: 75,
-                          height: 75,
+                            SizedBox(width: 10),
+                            listLanguage(item1),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  Flexible(
-                    flex: 4,
+                  Expanded(
+                    flex: 2,
                     child: Container(
-                      color: Colors.green,
+                      padding:
+                          EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                      color: Color.fromARGB(255, 248, 248, 248),
+                      width: double.infinity,
+                      child: SingleChildScrollView(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            listLanguage(item2),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Bubble(
+                                padding: BubbleEdges.all(10),
+                                margin: BubbleEdges.only(top: 15, left: 5),
+                                alignment: Alignment.topLeft,
+                                nip: BubbleNip.leftTop,
+                                color: Colors.white,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          SizedBox(),
+                                          Text(
+                                            '~ $item2',
+                                            style: TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ]),
+                                    if (isResultVisible)
+                                      Column(
+                                        children: [
+                                          TextField(
+                                            maxLines: 7,
+                                            style: TextStyle(fontSize: 14),
+                                            decoration: InputDecoration(
+                                              counterText: '',
+                                              enabledBorder: InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            maxLength: 300,
+                                            onChanged: (value) {},
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              SvgPicture.asset(
+                                                'assets/icons/carbon-design-system/32/copy.svg',
+                                                colorFilter: ColorFilter.mode(
+                                                    Colors.blue,
+                                                    BlendMode.srcIn),
+                                                width: 25,
+                                                height: 25,
+                                              ),
+                                              SizedBox(width: 12),
+                                              SvgPicture.asset(
+                                                'assets/icons/carbon-design-system/32/volume--up--filled.svg',
+                                                colorFilter: ColorFilter.mode(
+                                                    Colors.blue,
+                                                    BlendMode.srcIn),
+                                                width: 25,
+                                                height: 25,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ]),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          flex: 2,
+                          child: Card(
+                            color: Colors.white,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 7.5),
+                            child: SizedBox(
+                              width: size.width,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 10),
+                                child: ButtonTheme(
+                                  alignedDropdown: true,
+                                  child: DropdownButton(
+                                    iconSize: 0.0,
+                                    elevation: 2,
+                                    isExpanded: true,
+                                    value: item1,
+                                    underline:
+                                        Container(color: Colors.transparent),
+                                    dropdownColor: Colors.white,
+                                    items: listTranslateLanguage('1'),
+                                    onChanged: (value) {
+                                      print('value onChanged = $value');
+                                      print(
+                                          'locale awal = ${LocaleKeys.dictionary.tr()}');
+                                      setState(() {
+                                        print('onchange item1 before = $item1');
+                                        item1 = value.toString();
+                                        print('onchange item1 after = $item1');
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: micButtonColor,
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(20),
+                            ),
+                            onPressed: _toggleSpeech,
+                            child: SvgPicture.asset(
+                              'assets/icons/carbon-design-system/32/microphone--filled.svg',
+                              colorFilter: ColorFilter.mode(
+                                  micIconColor, BlendMode.srcIn),
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 2,
+                          child: Card(
+                            color: Colors.white,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 7.5),
+                            child: SizedBox(
+                              width: size.width,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 5),
+                                child: ButtonTheme(
+                                  alignedDropdown: true,
+                                  child: DropdownButton(
+                                      iconSize: 0.0,
+                                      elevation: 2,
+                                      isExpanded: true,
+                                      value: item2,
+                                      underline:
+                                          Container(color: Colors.transparent),
+                                      dropdownColor: Colors.white,
+                                      items: listTranslateLanguage('2'),
+                                      onChanged: (value) {
+                                        print('value onChanged = $value');
+                                        print(
+                                            'locale awal = ${LocaleKeys.dictionary.tr()}');
+                                        setState(() {
+                                          print(
+                                              'onchange item2 before = $item2');
+                                          item2 = value.toString();
+                                          print(
+                                              'onchange item2 after = $item2');
+                                        });
+                                      }),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Flexible(flex: 1, child: SizedBox())
+                ],
               ),
-              Spacer()
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -269,68 +349,89 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
     setState(() {});
-    print('isRecordingSpeech initSpeech = $_speechEnabled');
   }
 
-  void _startListening() async {
-    await _speechToText.listen(onResult: _onSpeechResult);
-    setState(() {});
-  }
-
-  void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {});
-  }
-
-  void _onSpeechResult(SpeechRecognitionResult result) {
+  void _toggleSpeech() {
     setState(() {
-      _lastWords = result.recognizedWords;
+      isRecordingSpeech = !isRecordingSpeech;
+      micButtonColor =
+          isRecordingSpeech ? Colors.white : Colors.indigo.shade800;
+      micIconColor = isRecordingSpeech ? Colors.indigo.shade800 : Colors.white;
+      isResultVisible ? isResultVisible = false : isResultVisible = true;
     });
   }
 
   void listenForPermissions() async {
     final status = await Permission.microphone.status;
-    switch (status) {
-      case PermissionStatus.denied:
-        requestForPermission();
-        break;
-      case PermissionStatus.granted:
-        break;
-      case PermissionStatus.limited:
-        break;
-      case PermissionStatus.permanentlyDenied:
-        break;
-      case PermissionStatus.restricted:
-        break;
-      case PermissionStatus.provisional:
-        break;
+    if (status.isDenied) {
+      await Permission.microphone.request();
     }
   }
 
-  Future<void> requestForPermission() async {
-    await Permission.microphone.request();
+  Widget listLanguage(String lang) {
+    Map<String, String> flagIcons = {
+      'Indonesia': 'assets/icons/icons8-indonesia-48.png',
+      'English': 'assets/icons/icons8-usa-48.png',
+      '日本語': 'assets/icons/icons8-japan-48.png',
+    };
+
+    return flagIcons.containsKey(lang)
+        ? Image.asset(
+            flagIcons[lang]!,
+            width: 40,
+            height: 40,
+          )
+        : SizedBox();
   }
 
-  Image? listLanguage(String lang) {
-    if (lang == 'Indonesia') {
-      return Image.asset(
-        'assets/icons/icons8-indonesia-48.png',
-        width: 40,
-        height: 40,
-      );
+  String setLocalLanguage(String? lang) {
+    if (lang == 'Bahasa Indonesia') {
+      return 'id';
     } else if (lang == 'English') {
-      return Image.asset(
-        'assets/icons/icons8-usa-48.png',
-        width: 40,
-        height: 40,
-      );
+      return 'en';
     } else if (lang == '日本語') {
-      return Image.asset(
-        'assets/icons/icons8-japan-48.png',
-        width: 40,
-        height: 40,
-      );
+      return 'ja';
     }
-    return null;
+    return '';
+  }
+
+  List<DropdownMenuItem<String>>? listTranslateLanguage(String source) {
+    if (source == '1') {
+      return languageList.map((bahasa) {
+        print('value item 1 = $bahasa');
+        return DropdownMenuItem(
+          value: bahasa,
+          child: Container(
+            alignment: Alignment.centerRight,
+            child: Text(
+              bahasa,
+              style: TextStyle(
+                  color: Colors.indigo.shade800,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        );
+      }).toList();
+    } else {
+      return languageList.map((bahasa) {
+        print('value item 2 = $bahasa');
+        return DropdownMenuItem(
+          value: bahasa,
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              bahasa,
+              style: TextStyle(
+                  color: Colors.indigo.shade800,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        );
+      }).toList();
+    }
   }
 }

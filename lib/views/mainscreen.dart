@@ -98,11 +98,7 @@ class MainScreen extends StatelessWidget {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                  child: listLanguage(bahasa) ?? Image.asset(
-                                    'assets/icons/icons8-global-50.png',
-                                    width: 25,
-                                    height: 25,
-                                  ),
+                                  child: listLanguage(bahasa) 
                                 ),
                                 Text(
                                   bahasa,
@@ -174,27 +170,20 @@ class MainScreen extends StatelessWidget {
         });
   }
 
-  Image? listLanguage(String lang) {
-    if (lang == 'Indonesia') {
-      return Image.asset(
-        'assets/icons/icons8-indonesia-48.png',
-        width: 25,
-        height: 25,
-      );
-    } else if (lang == 'English') {
-      return Image.asset(
-        'assets/icons/icons8-usa-48.png',
-        width: 25,
-        height: 25,
-      );
-    } else if (lang == '日本語') {
-      return Image.asset(
-        'assets/icons/icons8-japan-48.png',
-        width: 25,
-        height: 25,
-      );
-    }
-    return null;
+  Widget listLanguage(String lang) {
+    Map<String, String> flagIcons = {
+      'Indonesia': 'assets/icons/icons8-indonesia-48.png',
+      'English': 'assets/icons/icons8-usa-48.png',
+      '日本語': 'assets/icons/icons8-japan-48.png',
+    };
+
+    return flagIcons.containsKey(lang)
+        ? Image.asset(
+            flagIcons[lang]!,
+            width: 40,
+            height: 40,
+          )
+        : SizedBox();
   }
 
   String setLocalLanguage(String? lang) {

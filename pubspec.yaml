@@ -77,6 +77,10 @@ dependencies:
   # https://pub.dev/packages/speech_to_text
   speech_to_text: ^7.0.0
 
+  # Text to Speech
+  # https://pub.dev/packages/flutter_tts
+  flutter_tts: ^4.2.2
+
   # Bentuk bubble seperti chat bubble
   # https://pub.dev/packages/bubble
   bubble: ^1.2.1

@@ -26,7 +26,7 @@ class SplashScreenState extends State<SplashScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/icons8-translate-100.png',
+              'assets/icons/icons8-translate-100.png',
               width: 150,
               height: 150,
             ), // Jangan lupa kasih link icon8 di about atau section

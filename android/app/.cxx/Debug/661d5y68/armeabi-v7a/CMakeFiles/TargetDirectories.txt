@@ -1,0 +1,2 @@
+D:/Programs/VS_Code_List/flutter_test/pdf_translator_app_test/android/app/.cxx/Debug/661d5y68/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/Programs/VS_Code_List/flutter_test/pdf_translator_app_test/android/app/.cxx/Debug/661d5y68/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -9,5 +9,7 @@
   "english": "English",
   "document_translation": "Document Translation",
   "dictionary": "Dictionary",
-  "about": "About"
+  "about": "About",
+  "translation_process": "Waiting for Translation...",
+  "copy_clipboard_message": "Text was successfully copied to the clipboard"
 }

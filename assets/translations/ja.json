@@ -9,5 +9,7 @@
   "english": "英語",
   "document_translation": "文書翻訳",
   "dictionary": "辞書",
-  "about": "について"
+  "about": "について",
+  "translation_process": "翻訳を待っています...",
+  "copy_clipboard_message": "テキストはクリップボードに正常にコピーされました"
 }

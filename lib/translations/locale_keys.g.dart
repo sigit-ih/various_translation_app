@@ -14,5 +14,7 @@ abstract class  LocaleKeys {
   static const document_translation = 'document_translation';
   static const dictionary = 'dictionary';
   static const about = 'about';
+  static const translation_process = 'translation_process';
+  static const copy_clipboard_message = 'copy_clipboard_message';
 
 }

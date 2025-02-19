@@ -25,7 +25,9 @@ class CodegenLoader extends AssetLoader{
   "english": "English",
   "document_translation": "Document Translation",
   "dictionary": "Dictionary",
-  "about": "About"
+  "about": "About",
+  "translation_process": "Waiting for Translation...",
+  "copy_clipboard_message": "Text was successfully copied to the clipboard"
 };
 static const Map<String,dynamic> _id = {
   "version": "Versi",
@@ -38,7 +40,9 @@ static const Map<String,dynamic> _id = {
   "english": "Inggris",
   "document_translation": "Terjemahan Dokumen",
   "dictionary": "Kamus",
-  "about": "Tentang"
+  "about": "Tentang",
+  "translation_process": "Menunggu Translasi...",
+  "copy_clipboard_message": "Teks berhasil disalin ke clipboard"
 };
 static const Map<String,dynamic> _ja = {
   "version": "バージョン",
@@ -51,7 +55,9 @@ static const Map<String,dynamic> _ja = {
   "english": "英語",
   "document_translation": "文書翻訳",
   "dictionary": "辞書",
-  "about": "について"
+  "about": "について",
+  "translation_process": "翻訳を待っています...",
+  "copy_clipboard_message": "テキストはクリップボードに正常にコピーされました"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"en": _en, "id": _id, "ja": _ja};
 }

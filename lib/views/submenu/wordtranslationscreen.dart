@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:bubble/bubble.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pdf_translator_app_test/translations/locale_keys.g.dart';
 import 'package:pdf_translator_app_test/utilities/sharedpreferences.dart';
+import 'package:pdf_translator_app_test/utilities/texttospeech.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 
 class WordTranslationScreen extends StatefulWidget {
   const WordTranslationScreen({super.key});
@@ -16,11 +21,20 @@ class WordTranslationScreen extends StatefulWidget {
 }
 
 class _WordTranslationScreenState extends State<WordTranslationScreen> {
+  // Dropdown Item
   List<String> languageList = [
     LocaleKeys.english.tr(),
     LocaleKeys.indonesian.tr(),
     LocaleKeys.japanese.tr()
   ];
+
+  // Dropdown Language
+  String sourceLanguageItem = LocaleKeys.english.tr();
+  String targetLanguageItem = LocaleKeys.indonesian.tr();
+
+  // Text to Speech
+  final TextToSpeechService ttsService = TextToSpeechService();
+
   // Speech to text
   SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
@@ -28,18 +42,36 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
   String _lastWords = '';
   Color micButtonColor = Colors.indigo.shade800;
   Color micIconColor = Colors.white;
-  String language = 'English';
 
+  // Translation Result
+  TextEditingController _keywordTranslation = new TextEditingController();
+  TranslateLanguage _sourceLanguage = TranslateLanguage.english;
+  TranslateLanguage _targetLanguage = TranslateLanguage.indonesian;
+  final modelManager = OnDeviceTranslatorModelManager();
   bool isResultVisible = false;
+  String translationResult = '';
+
+  // Timer translation
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     _initSpeech();
     listenForPermissions();
+
     SharedPreferencesHelper.readLanguage().then((value) {
       setState(() {
-        language = value;
+        sourceLanguageItem = value;
+        targetLanguageItem = (sourceLanguageItem != LocaleKeys.english.tr())
+            ? LocaleKeys.english.tr()
+            : LocaleKeys.indonesian.tr();
+
+        // Update TranslateLanguage setelah mendapatkan data dari SharedPreferences
+        _sourceLanguage = getTranslateLanguage(sourceLanguageItem);
+        _targetLanguage = getTranslateLanguage(targetLanguageItem);
+
+        context.setLocale(Locale(setLocalLanguage(sourceLanguageItem)));
       });
     });
 
@@ -47,12 +79,17 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
   }
 
   @override
+  void dispose() {
+    _debounce?.cancel(); // Batalkan debounce saat widget dihapus
+    _keywordTranslation.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    String item1 = language;
-    String item2 = (language != 'English')
-        ? LocaleKeys.english.tr()
-        : LocaleKeys.indonesian.tr();
+    String language1 = sourceLanguageItem;
+    String language2 = targetLanguageItem;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -89,7 +126,7 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                           children: [
                             Expanded(
                               child: Bubble(
-                                padding: BubbleEdges.all(10),
+                                padding: BubbleEdges.all(size.width * 0.03),
                                 margin: BubbleEdges.only(top: 15, right: 5),
                                 alignment: Alignment.topRight,
                                 nip: BubbleNip.rightTop,
@@ -98,41 +135,86 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      '~ $item1',
+                                      '~ $language1',
                                       style: TextStyle(
                                         color: Colors.red,
-                                        fontSize: 16,
+                                        fontSize: size.width * 0.04,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     TextField(
-                                      maxLines: 7,
-                                      style: TextStyle(fontSize: 14),
+                                      maxLines: 6,
+                                      style: TextStyle(
+                                          fontSize: size.width * 0.035),
                                       decoration: InputDecoration(
                                         counterText: '',
                                         enabledBorder: InputBorder.none,
                                         focusedBorder: InputBorder.none,
                                       ),
                                       maxLength: 300,
-                                      onChanged: (value) {},
+                                      controller: _keywordTranslation,
+                                      onChanged: (value) {
+                                        // Saat pengguna mengetik, tampilkan pesan menunggu translasi
+                                        setState(() {
+                                          translationResult = LocaleKeys
+                                              .translation_process
+                                              .tr();
+                                          isResultVisible =
+                                              true; // Pastikan teks terlihat
+                                        });
+
+                                        // Batalkan timer sebelumnya jika ada
+                                        if (_debounce?.isActive ?? false)
+                                          _debounce!.cancel();
+
+                                        // Set timer baru untuk menunda translasi jika value tidak kosong
+                                        if (value != '' ||
+                                            value.replaceAll(' ', '') != '') {
+                                          _debounce =
+                                              Timer(Duration(seconds: 2), () {
+                                            debugPrint(
+                                                "Memulai proses translasi...");
+                                            translationProcess(_sourceLanguage,
+                                                _targetLanguage, value);
+                                          });
+                                        } else {
+                                          // Jika value kosong, kembalikan keadaan seperti semula
+                                          setState(() {
+                                            translationResult = '';
+                                            isResultVisible = false;
+                                          });
+                                        }
+                                      },
                                     ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        SvgPicture.asset(
-                                          'assets/icons/carbon-design-system/32/copy.svg',
-                                          colorFilter: ColorFilter.mode(
-                                              Colors.red, BlendMode.srcIn),
-                                          width: 25,
-                                          height: 25,
+                                        InkWell(
+                                          onTap: () {
+                                            copyToClipboard(_keywordTranslation
+                                                .text); // Salin teks dari TextField (_keywordTranslation)
+                                          },
+                                          child: SvgPicture.asset(
+                                            'assets/icons/carbon-design-system/32/copy.svg',
+                                            colorFilter: ColorFilter.mode(
+                                                Colors.red, BlendMode.srcIn),
+                                            width: size.width * 0.06,
+                                            height: size.width * 0.06,
+                                          ),
                                         ),
-                                        SizedBox(width: 12),
-                                        SvgPicture.asset(
-                                          'assets/icons/carbon-design-system/32/volume--up--filled.svg',
-                                          colorFilter: ColorFilter.mode(
-                                              Colors.red, BlendMode.srcIn),
-                                          width: 25,
-                                          height: 25,
+                                        SizedBox(width: size.width * 0.03),
+                                        InkWell(
+                                          onTap: () {
+                                            ttsService.speak(
+                                                _keywordTranslation.text);
+                                          },
+                                          child: SvgPicture.asset(
+                                            'assets/icons/carbon-design-system/32/volume--up--filled.svg',
+                                            colorFilter: ColorFilter.mode(
+                                                Colors.red, BlendMode.srcIn),
+                                            width: size.width * 0.06,
+                                            height: size.width * 0.06,
+                                          ),
                                         ),
                                       ],
                                     )
@@ -141,7 +223,7 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                               ),
                             ),
                             SizedBox(width: 10),
-                            listLanguage(item1),
+                            listLanguage(language1),
                           ],
                         ),
                       ),
@@ -158,11 +240,11 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            listLanguage(item2),
+                            listLanguage(language2),
                             SizedBox(width: 10),
                             Expanded(
                               child: Bubble(
-                                padding: BubbleEdges.all(10),
+                                padding: BubbleEdges.all(size.width * 0.03),
                                 margin: BubbleEdges.only(top: 15, left: 5),
                                 alignment: Alignment.topLeft,
                                 nip: BubbleNip.leftTop,
@@ -176,10 +258,10 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                                         children: [
                                           SizedBox(),
                                           Text(
-                                            '~ $item2',
+                                            '~ $language2',
                                             style: TextStyle(
                                               color: Colors.blue,
-                                              fontSize: 16,
+                                              fontSize: size.width * 0.04,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -187,37 +269,51 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                                     if (isResultVisible)
                                       Column(
                                         children: [
-                                          TextField(
-                                            maxLines: 7,
-                                            style: TextStyle(fontSize: 14),
-                                            decoration: InputDecoration(
-                                              counterText: '',
-                                              enabledBorder: InputBorder.none,
-                                              focusedBorder: InputBorder.none,
+                                          Container(
+                                            alignment: AlignmentDirectional
+                                                .centerStart,
+                                            margin:
+                                                EdgeInsets.fromLTRB(0, 5, 0, 0),
+                                            child: Text(
+                                              translationResult,
+                                              style: TextStyle(
+                                                  fontSize: size.width * 0.035),
+                                              textAlign: TextAlign.start,
                                             ),
-                                            maxLength: 300,
-                                            onChanged: (value) {},
                                           ),
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              SvgPicture.asset(
-                                                'assets/icons/carbon-design-system/32/copy.svg',
-                                                colorFilter: ColorFilter.mode(
-                                                    Colors.blue,
-                                                    BlendMode.srcIn),
-                                                width: 25,
-                                                height: 25,
+                                              InkWell(
+                                                onTap: () {
+                                                  copyToClipboard(
+                                                      translationResult); // Salin teks dari TextField (_lastWords)
+                                                },
+                                                child: SvgPicture.asset(
+                                                  'assets/icons/carbon-design-system/32/copy.svg',
+                                                  colorFilter: ColorFilter.mode(
+                                                      Colors.blue,
+                                                      BlendMode.srcIn),
+                                                  width: size.width * 0.06,
+                                                  height: size.width * 0.06,
+                                                ),
                                               ),
-                                              SizedBox(width: 12),
-                                              SvgPicture.asset(
-                                                'assets/icons/carbon-design-system/32/volume--up--filled.svg',
-                                                colorFilter: ColorFilter.mode(
-                                                    Colors.blue,
-                                                    BlendMode.srcIn),
-                                                width: 25,
-                                                height: 25,
+                                              SizedBox(
+                                                  width: size.width * 0.03),
+                                              InkWell(
+                                                onTap: () {
+                                                  ttsService
+                                                      .speak(translationResult);
+                                                },
+                                                child: SvgPicture.asset(
+                                                  'assets/icons/carbon-design-system/32/volume--up--filled.svg',
+                                                  colorFilter: ColorFilter.mode(
+                                                      Colors.blue,
+                                                      BlendMode.srcIn),
+                                                  width: size.width * 0.06,
+                                                  height: size.width * 0.06,
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -244,33 +340,43 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                             color: Colors.white,
                             margin: EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 7.5),
-                            child: SizedBox(
-                              width: size.width,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 5, horizontal: 10),
-                                child: ButtonTheme(
-                                  alignedDropdown: true,
-                                  child: DropdownButton(
-                                    iconSize: 0.0,
-                                    elevation: 2,
-                                    isExpanded: true,
-                                    value: item1,
-                                    underline:
-                                        Container(color: Colors.transparent),
-                                    dropdownColor: Colors.white,
-                                    items: listTranslateLanguage('1'),
-                                    onChanged: (value) {
-                                      print('value onChanged = $value');
-                                      print(
-                                          'locale awal = ${LocaleKeys.dictionary.tr()}');
-                                      setState(() {
-                                        print('onchange item1 before = $item1');
-                                        item1 = value.toString();
-                                        print('onchange item1 after = $item1');
-                                      });
-                                    },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 5),
+                              child: ButtonTheme(
+                                alignedDropdown: true,
+                                child: DropdownButton(
+                                  iconSize: 0.0,
+                                  elevation: 2,
+                                  isExpanded: true,
+                                  value: language1,
+                                  hint: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.only(
+                                      right: 5.0,
+                                    ),
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: Text(
+                                      language1,
+                                      style: TextStyle(
+                                        color: Colors.indigo.shade800,
+                                        fontSize: size.width * 0.035,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.end,
+                                    ),
                                   ),
+                                  underline:
+                                      Container(color: Colors.transparent),
+                                  dropdownColor: Colors.white,
+                                  items: listTranslateLanguage('1', size),
+                                  onChanged: (value) {
+                                    print('value onChanged source = $value');
+                                    if (value != sourceLanguageItem &&
+                                        value != targetLanguageItem) {
+                                      changeLanguage(value.toString(),
+                                          true); // Untuk Source Language
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -300,34 +406,50 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                             color: Colors.white,
                             margin: EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 7.5),
-                            child: SizedBox(
-                              width: size.width,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 5),
-                                child: ButtonTheme(
-                                  alignedDropdown: true,
-                                  child: DropdownButton(
-                                      iconSize: 0.0,
-                                      elevation: 2,
-                                      isExpanded: true,
-                                      value: item2,
-                                      underline:
-                                          Container(color: Colors.transparent),
-                                      dropdownColor: Colors.white,
-                                      items: listTranslateLanguage('2'),
-                                      onChanged: (value) {
-                                        print('value onChanged = $value');
-                                        print(
-                                            'locale awal = ${LocaleKeys.dictionary.tr()}');
-                                        setState(() {
-                                          print(
-                                              'onchange item2 before = $item2');
-                                          item2 = value.toString();
-                                          print(
-                                              'onchange item2 after = $item2');
-                                        });
-                                      }),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 5),
+                              child: ButtonTheme(
+                                alignedDropdown: true,
+                                child: DropdownButton(
+                                  iconSize: 0.0,
+                                  elevation: 2,
+                                  isExpanded: true,
+                                  value: language2,
+                                  hint: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.only(
+                                      left: 5.0,
+                                    ),
+                                    alignment: AlignmentDirectional.centerStart,
+                                    child: Text(
+                                      language2,
+                                      style: TextStyle(
+                                        color: Colors.indigo.shade800,
+                                        fontSize: size.width * 0.035,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.start,
+                                    ),
+                                  ),
+                                  underline:
+                                      Container(color: Colors.transparent),
+                                  dropdownColor: Colors.white,
+                                  items: listTranslateLanguage('2', size),
+                                  onChanged: (value) {
+                                    print('value onChanged target = $value');
+                                    if (value != sourceLanguageItem &&
+                                        value != targetLanguageItem) {
+                                      setState(() {
+                                        // targetLanguageItem = value.toString();
+                                        translationResult =
+                                            ''; // Reset translation result saat dropdown berubah
+                                        isResultVisible =
+                                            false; // Sembunyikan hasil translasi sementara
+                                      });
+                                      changeLanguage(value.toString(),
+                                          false); // Untuk Target Language
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -357,7 +479,7 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
       micButtonColor =
           isRecordingSpeech ? Colors.white : Colors.indigo.shade800;
       micIconColor = isRecordingSpeech ? Colors.indigo.shade800 : Colors.white;
-      isResultVisible ? isResultVisible = false : isResultVisible = true;
+      // isResultVisible ? isResultVisible = false : isResultVisible = true;
     });
   }
 
@@ -370,9 +492,9 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
 
   Widget listLanguage(String lang) {
     Map<String, String> flagIcons = {
-      'Indonesia': 'assets/icons/icons8-indonesia-48.png',
-      'English': 'assets/icons/icons8-usa-48.png',
-      '日本語': 'assets/icons/icons8-japan-48.png',
+      LocaleKeys.indonesian.tr(): 'assets/icons/icons8-indonesia-48.png',
+      LocaleKeys.english.tr(): 'assets/icons/icons8-usa-48.png',
+      LocaleKeys.japanese.tr(): 'assets/icons/icons8-japan-48.png',
     };
 
     return flagIcons.containsKey(lang)
@@ -385,7 +507,7 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
   }
 
   String setLocalLanguage(String? lang) {
-    if (lang == 'Bahasa Indonesia') {
+    if (lang == 'Indonesia') {
       return 'id';
     } else if (lang == 'English') {
       return 'en';
@@ -395,43 +517,114 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
     return '';
   }
 
-  List<DropdownMenuItem<String>>? listTranslateLanguage(String source) {
-    if (source == '1') {
-      return languageList.map((bahasa) {
-        print('value item 1 = $bahasa');
-        return DropdownMenuItem(
-          value: bahasa,
-          child: Container(
-            alignment: Alignment.centerRight,
-            child: Text(
-              bahasa,
-              style: TextStyle(
-                  color: Colors.indigo.shade800,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold),
-              textAlign: TextAlign.end,
-            ),
+  List<DropdownMenuItem<String>>? listTranslateLanguage(
+      String source, Size size) {
+    return languageList.map((bahasa) {
+      print('value item $source = $bahasa');
+      return DropdownMenuItem(
+        value: bahasa,
+        child: Container(
+          padding: EdgeInsets.only(
+            right: source == '1' ? 5.0 : 0.0,
+            left: source == '2' ? 5.0 : 0.0,
           ),
-        );
-      }).toList();
-    } else {
-      return languageList.map((bahasa) {
-        print('value item 2 = $bahasa');
-        return DropdownMenuItem(
-          value: bahasa,
-          child: Container(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              bahasa,
-              style: TextStyle(
-                  color: Colors.indigo.shade800,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold),
-              textAlign: TextAlign.start,
+          alignment: source == '1'
+              ? AlignmentDirectional.centerEnd
+              : AlignmentDirectional.centerStart,
+          child: Text(
+            bahasa,
+            style: TextStyle(
+              color: Colors.indigo.shade800,
+              fontSize: size.width * 0.035,
+              fontWeight: FontWeight.bold,
             ),
+            textAlign: source == '1' ? TextAlign.end : TextAlign.start,
           ),
-        );
-      }).toList();
+        ),
+      );
+    }).toList();
+  }
+
+  Future<void> translationProcess(TranslateLanguage sourceLang,
+      TranslateLanguage targetLang, String text) async {
+    if (text.isEmpty) return;
+
+    final modelManager = OnDeviceTranslatorModelManager();
+
+    try {
+      debugPrint("Teks sebelum translasi: $text");
+      debugPrint("Bahasa sumber: ${sourceLang.bcpCode}");
+      debugPrint("Bahasa target: ${targetLang.bcpCode}");
+
+      // Pastikan model sudah diunduh
+      if (!await modelManager.isModelDownloaded(sourceLang.bcpCode)) {
+        debugPrint("Mengunduh model bahasa: ${sourceLang.bcpCode}");
+        await modelManager.downloadModel(sourceLang.bcpCode);
+      }
+      if (!await modelManager.isModelDownloaded(targetLang.bcpCode)) {
+        debugPrint("Mengunduh model bahasa: ${targetLang.bcpCode}");
+        await modelManager.downloadModel(targetLang.bcpCode);
+      }
+
+      // Inisialisasi Translator
+      final onDeviceTranslator = OnDeviceTranslator(
+        sourceLanguage: sourceLang,
+        targetLanguage: targetLang,
+      );
+
+      debugPrint("Mengirim permintaan ke API...");
+      final translatedText = await onDeviceTranslator.translateText(text);
+      debugPrint("Hasil translasi: $translatedText");
+
+      if (mounted) {
+        setState(() {
+          translationResult = translatedText;
+          isResultVisible = true;
+        });
+      }
+    } catch (e, stacktrace) {
+      debugPrint("Terjadi kesalahan saat menerjemahkan: $e");
+      debugPrint("Detail error: $stacktrace");
+
+      if (mounted) {
+        setState(() {
+          translationResult = "Gagal menerjemahkan";
+        });
+      }
     }
+  }
+
+  void changeLanguage(String selectedLanguage, bool isSource) {
+    setState(() {
+      if (isSource) {
+        sourceLanguageItem = selectedLanguage;
+        _sourceLanguage = getTranslateLanguage(selectedLanguage);
+      } else {
+        targetLanguageItem = selectedLanguage;
+        _targetLanguage = getTranslateLanguage(selectedLanguage);
+      }
+    });
+
+    print(
+        'Source Language: $_sourceLanguage, Target Language: $_targetLanguage');
+  }
+
+  TranslateLanguage getTranslateLanguage(String language) {
+    final languageMap = {
+      LocaleKeys.english.tr(): TranslateLanguage.english,
+      LocaleKeys.indonesian.tr(): TranslateLanguage.indonesian,
+      LocaleKeys.japanese.tr(): TranslateLanguage.japanese,
+    };
+
+    return languageMap[language] ?? TranslateLanguage.english;
+  }
+
+  void copyToClipboard(String text) {
+    print(LocaleKeys.copy_clipboard_message);
+    Clipboard.setData(ClipboardData(text: text)).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(LocaleKeys.copy_clipboard_message.tr())),
+      );
+    });
   }
 }

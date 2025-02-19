@@ -167,31 +167,28 @@ class _MainScreenState extends State<MainScreen> {
           child: Card(
             color: Colors.indigo[900],
             margin: EdgeInsets.fromLTRB(15, 5, 15, 5),
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-                    child: SvgPicture.asset(
-                      iconMenu[index],
-                      colorFilter: const ColorFilter.mode(
-                          Colors.white, BlendMode.srcIn),
-                      width: 25,
-                      height: 25,
-                      semanticsLabel: listMainMenu[index],
-                    ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                  child: SvgPicture.asset(
+                    iconMenu[index],
+                    colorFilter: const ColorFilter.mode(
+                        Colors.white, BlendMode.srcIn),
+                    width: 25,
+                    height: 25,
+                    semanticsLabel: listMainMenu[index],
                   ),
-                  Text(
-                    listMainMenu[index],
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+                ),
+                Text(
+                  listMainMenu[index],
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
         );

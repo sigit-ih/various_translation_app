@@ -9,5 +9,7 @@
   "english": "Inggris",
   "document_translation": "Terjemahan Dokumen",
   "dictionary": "Kamus",
-  "about": "Tentang"
+  "about": "Tentang",
+  "translation_process": "Menunggu Translasi...",
+  "copy_clipboard_message": "Teks berhasil disalin ke clipboard"
 }

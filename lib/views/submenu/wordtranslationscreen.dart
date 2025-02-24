@@ -204,9 +204,16 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                                         ),
                                         SizedBox(width: size.width * 0.03),
                                         InkWell(
-                                          onTap: () {
-                                            ttsService.speak(
-                                                _keywordTranslation.text);
+                                          onTap: () async {
+                                            if (ttsService.isSpeaking()) {
+                                              await ttsService.stop();
+                                              // setState(() {});
+                                            } else {
+                                              await ttsService.speak(
+                                                  _keywordTranslation.text,
+                                                  language1);
+                                              // setState(() {});
+                                            }
                                           },
                                           child: SvgPicture.asset(
                                             'assets/icons/carbon-design-system/32/volume--up--filled.svg',
@@ -302,9 +309,16 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                                               SizedBox(
                                                   width: size.width * 0.03),
                                               InkWell(
-                                                onTap: () {
-                                                  ttsService
-                                                      .speak(translationResult);
+                                                onTap: () async {
+                                                  if (ttsService.isSpeaking()) {
+                                                    await ttsService.stop();
+                                                    // setState(() {});
+                                                  } else {
+                                                    await ttsService.speak(
+                                                        translationResult,
+                                                        language2);
+                                                    // setState(() {});
+                                                  }
                                                 },
                                                 child: SvgPicture.asset(
                                                   'assets/icons/carbon-design-system/32/volume--up--filled.svg',
@@ -439,15 +453,39 @@ class _WordTranslationScreenState extends State<WordTranslationScreen> {
                                     print('value onChanged target = $value');
                                     if (value != sourceLanguageItem &&
                                         value != targetLanguageItem) {
-                                      setState(() {
-                                        // targetLanguageItem = value.toString();
-                                        translationResult =
-                                            ''; // Reset translation result saat dropdown berubah
-                                        isResultVisible =
-                                            false; // Sembunyikan hasil translasi sementara
-                                      });
+                                      // setState(() {
+                                      //   // targetLanguageItem = value.toString();
+                                      //   translationResult =
+                                      //       ''; // Reset translation result saat dropdown berubah
+                                      //   isResultVisible =
+                                      //       false; // Sembunyikan hasil translasi sementara
+                                      // });
                                       changeLanguage(value.toString(),
                                           false); // Untuk Target Language
+
+                                      // Set timer baru untuk menunda translasi jika value tidak kosong
+                                      if (translationResult != '' ||
+                                          translationResult.replaceAll(' ', '') != '') {
+                                        translationResult = LocaleKeys
+                                              .translation_process
+                                              .tr();
+                                          isResultVisible =
+                                              true;
+                                        _debounce =
+                                            Timer(Duration(seconds: 2), () {
+                                          debugPrint(
+                                              "Memulai proses translasi...");
+                                          translationProcess(_sourceLanguage,
+                                              _targetLanguage, _keywordTranslation
+                                                .text);
+                                        });
+                                      } else {
+                                        // Jika value kosong, kembalikan keadaan seperti semula
+                                        setState(() {
+                                          translationResult = '';
+                                          isResultVisible = false;
+                                        });
+                                      }
                                     }
                                   },
                                 ),

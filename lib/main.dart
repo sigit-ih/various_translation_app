@@ -1,4 +1,4 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +6,7 @@ import 'package:pdf_translator_app_test/translations/codegen_loader.g.dart';
 import 'package:pdf_translator_app_test/utilities/routes.dart';
 import 'package:pdf_translator_app_test/views/blocs/dictionary_bloc.dart';
 import 'package:pdf_translator_app_test/views/blocs/language_bloc.dart';
+import 'package:pdf_translator_app_test/views/blocs/internet_bloc.dart';
 import 'package:pdf_translator_app_test/views/mainscreen.dart';
 import 'package:pdf_translator_app_test/views/splashscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/aboutscreen.dart';
@@ -31,9 +32,10 @@ void main() async {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<LanguageBloc>(
-            create: (context) => LanguageBloc()..add(LoadLanguageEvent()), // Event yang benar
+            create: (context) => LanguageBloc()..add(LoadLanguageEvent()),
           ),
           BlocProvider(create: (context) => DictionaryBloc()),
+          BlocProvider(create: (context) => InternetBloc()),
         ],
         child: const MainApp(),
       ),

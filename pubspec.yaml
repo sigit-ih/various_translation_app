@@ -63,7 +63,7 @@ dependencies:
 
   # 
   # https://pub.dev/packages/camera
-  camera: ^0.11.1
+  camera: ^0.10.5+5
 
   # 
   # https://pub.dev/packages/image_picker
@@ -89,9 +89,9 @@ dependencies:
   # https://pub.dev/packages/permission_handler
   permission_handler: ^11.3.1
 
-  # Untuk konversi hiragana katakana kanji romaji (Tidak bisa konversi kanji ke hiragana atau romaji)
-  # https://pub.dev/packages/kana_kit
-  # kana_kit: ^2.1.1
+  # Cek perubahan jaringan
+  # https://pub.dev/packages/connectivity_plus
+  connectivity_plus: ^6.1.3
 
 dependency_overrides:
   google_mlkit_commons: ^0.9.0

@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:pdf_translator_app_test/translations/codegen_loader.g.dart';
 import 'package:pdf_translator_app_test/utilities/routes.dart';
 import 'package:pdf_translator_app_test/views/mainscreen.dart';
-import 'package:pdf_translator_app_test/views/old_menu/old_01/splashscreen.dart';
+import 'package:pdf_translator_app_test/views/old_menu/splashscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/aboutscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/dictionaryscreen.dart';
 import 'package:pdf_translator_app_test/views/submenu/documenttranslationscreen.dart';
